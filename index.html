@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10131d">
+<title>Calculadora Pro</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#0c1019;color:#f5f7ff;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;padding:18px}
+.app{width:100%;max-width:430px;background:#171d2b;border:1px solid #2b3448;border-radius:24px;padding:20px;box-shadow:0 18px 50px #0008}
+h1{font-size:22px;margin:0 0 5px}.sub{color:#9da9bf;font-size:12px;margin-bottom:18px}
+.screen{background:#0b101a;border-radius:16px;padding:16px;margin-bottom:14px;min-height:112px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+#expr{color:#aab5ca;text-align:right;min-height:22px;overflow-wrap:anywhere}
+#display{font-size:34px;text-align:right;overflow-wrap:anywhere;margin-top:8px;min-height:42px}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+button{border:0;border-radius:13px;min-height:57px;font-size:18px;color:#f5f7ff;background:#273247;cursor:pointer}
+button:active{filter:brightness(1.25);transform:scale(.98)}
+.fn{background:#34435d;color:#b9d5ff}.op{background:#284b79}.clear{background:#743b4c}.equal{background:#347cce}
+.wide{grid-column:span 2}
+.note{color:#8996ad;font-size:11px;text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+<main class="app">
+<h1>Calculadora Pro</h1><div class="sub">Calculadora científica</div>
+<div class="screen"><div id="expr"></div><div id="display">0</div></div>
+<div class="keys">
+<button class="clear" onclick="clearAll()">AC</button><button onclick="del()">⌫</button><button class="fn" onclick="put('(')">(</button><button class="fn" onclick="put(')')">)</button>
+<button class="fn" onclick="fn('sin')">sin</button><button class="fn" onclick="fn('cos')">cos</button><button class="fn" onclick="fn('tan')">tan</button><button class="op" onclick="put('÷')">÷</button>
+<button class="fn" onclick="fn('sqrt')">√</button><button class="fn" onclick="put('^')">xʸ</button><button class="fn" onclick="put('π')">π</button><button class="op" onclick="put('×')">×</button>
+<button onclick="put('7')">7</button><button onclick="put('8')">8</button><button onclick="put('9')">9</button><button class="op" onclick="put('-')">−</button>
+<button onclick="put('4')">4</button><button onclick="put('5')">5</button><button onclick="put('6')">6</button><button class="op" onclick="put('+')">+</button>
+<button onclick="put('1')">1</button><button onclick="put('2')">2</button><button onclick="put('3')">3</button><button class="fn" onclick="put('%')">%</button>
+<button class="wide" onclick="put('0')">0</button><button onclick="put('.')">.</button><button class="equal" onclick="calculate()">=</button>
+</div><div class="note">Funciones trigonométricas en grados · π · potencias · raíces</div>
+</main>
+<script>
+let expression='';
+const display=document.getElementById('display'), expr=document.getElementById('expr');
+function refresh(){display.textContent=expression||'0';}
+function put(v){expression+=v;refresh();}
+function fn(name){expression+=name+'(';refresh();}
+function clearAll(){expression='';expr.textContent='';refresh();}
+function del(){expression=expression.slice(0,-1);refresh();}
+function calculate(){
+ try{
+  let s=expression.replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'Math.PI').replace(/\^/g,'**').replace(/(\d+(?:\.\d+)?)%/g,'($1/100)');
+  s=s.replace(/sin\(/g,'Math.sin((Math.PI/180)*').replace(/cos\(/g,'Math.cos((Math.PI/180)*').replace(/tan\(/g,'Math.tan((Math.PI/180)*').replace(/sqrt\(/g,'Math.sqrt(');
+  if(!/^[0-9+\-*/().\sA-Za-z]*$/.test(s)||/(?:constructor|window|document|alert|eval)/i.test(s))throw Error();
+  const result=Function('"use strict";return ('+s+')')();
+  if(typeof result!=='number'||!Number.isFinite(result))throw Error();
+  expr.textContent=expression+' =';expression=String(Number(result.toPrecision(12)));refresh();
+ }catch(e){display.textContent='Error';}
+}
+document.addEventListener('keydown',e=>{if('0123456789.+-*/()%'.includes(e.key)){put(e.key)}else if(e.key==='Enter'){calculate()}else if(e.key==='Backspace'){del()}else if(e.key==='Escape'){clearAll()}});
+</script>
+</body></html>
